@@ -13,10 +13,11 @@ const char* mqtt_pwd = MQTT_PWD;
 
 // time variables
 unsigned long currentMillis;
-unsigned long previousMillis = 0;
+unsigned long mqttPreviousMillis = 0;
 //mqtt topic for tests
 const char* topic_publish_test = "esp32/test";
 const char* topic_subscribe_test = "esp32/sub_test";
+const char* topic_publish_dht_readings = "esp32/dht11_sensor";
 
 WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -46,14 +47,36 @@ void connectAndReconnectToBrokerMQTT(){
   mqttClient.loop();
 }
 
+String structToJsonDh11Readings(){
+  DHTSensorReadings dhtReadings = handleDhtSensor();
+  if(!dhtReadings.isReadingsValid){
+    Serial.println("DHT11 readings are invalid...");
+    return "";
+  }
+  else {
+    String json = "{";
+    json += "\"temperatureCelcius\":" + String(dhtReadings.temperatureCelcius);
+    json += ",\"temperatureFahrenheit\":" + String(dhtReadings.temperatureFahrenheit);
+    json += ",\"humidityPercent\":" + String(dhtReadings.humidityPercent);
+    json += ",\"heatIndexCelcius\":" + String(dhtReadings.heatIndexCelcius);
+    json += ",\"heatIndexFahrenheit\":" + String(dhtReadings.heatIndexFahrenheit);
+    json += "}";
+
+    return json;
+  }
+}
+
 void publishToBrokerMQTT(){
   connectAndReconnectToBrokerMQTT();
   currentMillis = millis();
 
-  if(currentMillis - previousMillis >= 10000){
-    previousMillis = currentMillis;
+  if(currentMillis - mqttPreviousMillis >= 10000){
+    mqttPreviousMillis = currentMillis;
     //publish msg to topic
     mqttClient.publish(topic_publish_test, "Ceci est un test");
+    String readingsJson = structToJsonDh11Readings();
+    mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
+
   }
 }
 
