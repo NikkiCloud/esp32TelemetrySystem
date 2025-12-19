@@ -2,7 +2,7 @@
 
 # Do NOT commit secrets (VERY IMPORTANT)
 secrets.h
-secrets.py
+config.py
 
 # Build output (Arduino IDE)
 *.bin
