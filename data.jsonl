@@ -1,0 +1,118 @@
+{
+    "temperatureCelcius": 23.3,
+    "temperatureFahrenheit": 73.94,
+    "humidityPercent": 26.0,
+    "heatIndexCelcius": 22.36,
+    "heatIndexFahrenheit": 72.26,
+    "timestamp": 2730025,
+    "received at": 1766171892.0775619,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.2,
+    "temperatureFahrenheit": 73.76,
+    "humidityPercent": 26.0,
+    "heatIndexCelcius": 22.25,
+    "heatIndexFahrenheit": 72.06,
+    "timestamp": 2740025,
+    "received at": 1766171902.0628123,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.3,
+    "temperatureFahrenheit": 73.94,
+    "humidityPercent": 26.0,
+    "heatIndexCelcius": 22.36,
+    "heatIndexFahrenheit": 72.26,
+    "timestamp": 2750026,
+    "received at": 1766171912.166368,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.1,
+    "temperatureFahrenheit": 73.58,
+    "humidityPercent": 26.0,
+    "heatIndexCelcius": 22.14,
+    "heatIndexFahrenheit": 71.86,
+    "timestamp": 2760026,
+    "received at": 1766171922.0772846,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.6,
+    "temperatureFahrenheit": 74.48,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 22.72,
+    "heatIndexFahrenheit": 72.9,
+    "timestamp": 2770025,
+    "received at": 1766171932.0765696,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.4,
+    "temperatureFahrenheit": 74.12,
+    "humidityPercent": 26.0,
+    "heatIndexCelcius": 22.47,
+    "heatIndexFahrenheit": 72.45,
+    "timestamp": 2780025,
+    "received at": 1766171942.0809112,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.9,
+    "temperatureFahrenheit": 75.02,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 23.05,
+    "heatIndexFahrenheit": 73.49,
+    "timestamp": 2790025,
+    "received at": 1766171952.1423914,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.9,
+    "temperatureFahrenheit": 75.02,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 23.05,
+    "heatIndexFahrenheit": 73.49,
+    "timestamp": 2800026,
+    "received at": 1766171962.1372828,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.4,
+    "temperatureFahrenheit": 74.12,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 22.5,
+    "heatIndexFahrenheit": 72.5,
+    "timestamp": 2810025,
+    "received at": 1766171972.1627991,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.4,
+    "temperatureFahrenheit": 74.12,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 22.5,
+    "heatIndexFahrenheit": 72.5,
+    "timestamp": 2820025,
+    "received at": 1766171982.0761776,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.5,
+    "temperatureFahrenheit": 74.3,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 22.61,
+    "heatIndexFahrenheit": 72.7,
+    "timestamp": 2830025,
+    "received at": 1766171992.0750837,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.5,
+    "temperatureFahrenheit": 74.3,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 22.61,
+    "heatIndexFahrenheit": 72.7,
+    "timestamp": 2840026,
+    "received at": 1766172002.059018,
+    "topic": "esp32/dht11_sensor"
+}{
+    "temperatureCelcius": 23.9,
+    "temperatureFahrenheit": 75.02,
+    "humidityPercent": 27.0,
+    "heatIndexCelcius": 23.05,
+    "heatIndexFahrenheit": 73.49,
+    "timestamp": 2850025,
+    "received at": 1766172012.0750985,
+    "topic": "esp32/dht11_sensor"
+}

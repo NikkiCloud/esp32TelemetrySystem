@@ -6,5 +6,6 @@ struct DHTSensorReadings {
   float heatIndexCelcius;
   float heatIndexFahrenheit;
   bool isReadingsValid;
+  unsigned long timestamp_millisec;
 };
 DHTSensorReadings handleDhtSensor();

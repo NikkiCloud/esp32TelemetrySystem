@@ -60,6 +60,7 @@ String structToJsonDh11Readings(){
     json += ",\"humidityPercent\":" + String(dhtReadings.humidityPercent);
     json += ",\"heatIndexCelcius\":" + String(dhtReadings.heatIndexCelcius);
     json += ",\"heatIndexFahrenheit\":" + String(dhtReadings.heatIndexFahrenheit);
+    json += ",\"detected at\":" + String(dhtReadings.timestamp_millisec);
     json += "}";
 
     return json;
