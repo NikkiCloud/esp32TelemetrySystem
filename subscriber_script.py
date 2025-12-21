@@ -30,7 +30,7 @@ def convert_jsonstrin_to_dict(payload : bytes) -> dict:
 
 def save_data_to_jsonfile(data: dict, filename: str) -> None:
     with open(filename, "a") as f:
-        json.dump(data, f, indent=4)
+        f.write(json.dumps(data) + "\n")
 
     
 
