@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import config
 import json
 import time
+import datetime
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -17,6 +18,7 @@ def on_message(client, userdata, msg):
     print("Message came from topic: "+ msg.topic + ", QoS: " + str(msg.qos) + ", Message content: " + msg.payload.decode())
     data_dict = convert_jsonstrin_to_dict(msg.payload)
     data_dict["received at"] =  time.time()
+    #data_dict["received at"] =  datetime.datetime.now().isoformat()
     data_dict["topic"] =  msg.topic
     if data_dict:
         save_data_to_jsonfile(data_dict, "data.jsonl")
