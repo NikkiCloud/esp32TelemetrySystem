@@ -5,7 +5,7 @@ import json
 from pydantic import InstanceOf
 
 class StatisticCalculator:
-    def __init__(self, filename: str, expected_msg_interval_millisec: int = 10000, tolerance_millisec: float = 1.01):
+    def __init__(self, filename: str, expected_msg_interval_millisec: int = 10000, tolerance_millisec: float = 1.5):
         self.entries = self.read_jsonl_file(filename)
         self.mean = self.calculate_mean()
         self.min = self.calculate_min()
@@ -13,6 +13,16 @@ class StatisticCalculator:
         self.median = self.calculate_median()
         self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS = expected_msg_interval_millisec
         self.TOLERANCE_MESSAGE_INTERVAL = tolerance_millisec
+        self.VALID_RANGES = {
+            "temperatureCelcius": (0, 50),
+            "temperatureFahrenheit": (32, 122),
+            "humidityPercent": (0, 100)
+        }
+        self.VALID_CHANGES_JUMPS = {
+            "temperatureCelcius": 1.5,
+            "temperatureFahrenheit": 3.0,
+            "humidityPercent": 5.0
+        }
 
     def read_jsonl_file(self, filename: str) -> list[dict]:
         entries = []
@@ -81,17 +91,52 @@ class StatisticCalculator:
 
     def detect_missing_messages(self):
         delta_timestamp_list = self.calculate_timestamp_delta()
-        number_of_gaps = 0
+        total_gaps = 0;
+        total_missing_msgs = 0;
         for delta in delta_timestamp_list:
             if(delta > self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS * self.TOLERANCE_MESSAGE_INTERVAL):
-                number_of_gaps += 1
+                total_gaps += 1
                 number_of_missing_msg = round(delta/self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS) - 1
+                total_missing_msgs += number_of_missing_msg
                 print(
-                f"Total messages: {len(delta_timestamp_list) + number_of_missing_msg} \n"
                 f"Expected interval (in seconds): {self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS/1000} \n"
                 f"Delta observed (in seconds): {delta/1000} \n"
-                f"Estimated number of missing messages: {number_of_missing_msg} \n"
-                f"Number of gaps (meaning how many interruption occured) {number_of_gaps}\n")
+                f"Estimated number of missing messages: {number_of_missing_msg} \n")
+                
+        print(
+            f"Total of recorded messages: {len(self.entries)}\n"
+            f"Total of missing messages: {total_missing_msgs}\n"
+            f"Total of expected messages: {len(self.entries) + total_missing_msgs}\n"
+            f"Number of gaps (meaning how many interruption occured) {total_gaps}\n")
+    
+    def out_of_range_detection(self):
+        out_of_range_entries = []
+        for entry in self.entries:
+            for key, value in entry.items():
+                if(key in self.VALID_RANGES):
+                    min_value, max_value = self.VALID_RANGES[key]
+                    if value < min_value or value > max_value:
+                        out_of_range_entries.append({"entry": entry, "key": key, "value": value, "valid_range": (min_value, max_value)})
+        return out_of_range_entries 
+
+    def sudden_change_detection(self):
+        sudden_change_entries = []
+        for entry in self.entries:
+            for key, value in entry.items():
+                if(key in self.VALID_CHANGES_JUMPS):
+                    max_jump = self.VALID_CHANGES_JUMPS[key]
+                    previous_entry = self.entries[self.entries.index(entry)-1]
+                    if key in previous_entry:
+                        previous_value = previous_entry[key]
+                        if abs(value - previous_value) > max_jump:
+                            sudden_change_entries.append({"entry": entry, "key": key, "value": value, "previous_value": previous_value, "max_jump": max_jump})
+        return sudden_change_entries
+    
+    def heatindex_consistency_detection(self):
+        heatindex_issues = []
+        for entry in self.entries:
+            pass
+
 
         
 def main():
