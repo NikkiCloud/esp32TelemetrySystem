@@ -17,7 +17,7 @@ unsigned long mqttPreviousMillis = 0;
 //mqtt topic for tests
 const char* topic_publish_test = "esp32/test";
 const char* topic_subscribe_test = "esp32/sub_test";
-const char* topic_publish_dht_readings = "esp32/dht11_sensor";
+char* topic_publish_dht_readings = "iot/home/A01/telemetry";
 
 WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -71,13 +71,21 @@ void publishToBrokerMQTT(){
   connectAndReconnectToBrokerMQTT();
   currentMillis = millis();
 
-  if(currentMillis - mqttPreviousMillis >= 10000){
+  if(currentMillis - mqttPreviousMillis >= 5000){
     mqttPreviousMillis = currentMillis;
     //publish msg to topic
     mqttClient.publish(topic_publish_test, "Ceci est un test");
     String readingsJson = structToJsonDh11Readings();
-    mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
-
+    if(topic_publish_dht_readings == "iot/home/A01/telemetry")
+    {
+      mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
+      topic_publish_dht_readings = "iot/home/B01/telemetry";
+    }
+    else 
+    {
+      mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
+      topic_publish_dht_readings = "iot/home/A01/telemetry";
+    }
   }
 }
 
