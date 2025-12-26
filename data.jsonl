@@ -207,3 +207,4 @@
 {"temperatureCelcius": 22.0, "temperatureFahrenheit": 71.6, "humidityPercent": 6.0, "heatIndexCelcius": 20.41, "heatIndexFahrenheit": 68.74, "timestamp": 410026, "received at": 1766428916.461904, "topic": "esp32/dht11_sensor"}
 {"temperatureCelcius": 22.4, "temperatureFahrenheit": 72.32, "humidityPercent": 6.0, "heatIndexCelcius": 20.85, "heatIndexFahrenheit": 69.53, "timestamp": 420026, "received at": 1766428926.4613802, "topic": "esp32/dht11_sensor"}
 {"temperatureCelcius": 22.0, "temperatureFahrenheit": 71.6, "humidityPercent": 6.0, "heatIndexCelcius": 20.41, "heatIndexFahrenheit": 68.74, "timestamp": 430025, "received at": 1766428936.4786122, "topic": "esp32/dht11_sensor"}
+{"temperatureCelcius": 22.0, "temperatureFahrenheit": 71.6, "humidityPercent": 6.0, "heatIndexCelcius": 20.41, "heatIndexFahrenheit": 68.74, "timestamp": 430025, "received at": 1766428936.4786122, "topic": "esp32/dht11_sensor"}

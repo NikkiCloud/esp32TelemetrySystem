@@ -115,21 +115,30 @@ class StatisticCalculator:
             for key, value in entry.items():
                 if(key in self.VALID_RANGES):
                     min_value, max_value = self.VALID_RANGES[key]
+                    try:
+                        value = float(value)
+                    except (ValueError, TypeError):
+                        continue
                     if value < min_value or value > max_value:
                         out_of_range_entries.append({"entry": entry, "key": key, "value": value, "valid_range": (min_value, max_value)})
         return out_of_range_entries 
 
     def sudden_change_detection(self):
         sudden_change_entries = []
-        for entry in self.entries:
-            for key, value in entry.items():
-                if(key in self.VALID_CHANGES_JUMPS):
-                    max_jump = self.VALID_CHANGES_JUMPS[key]
-                    previous_entry = self.entries[self.entries.index(entry)-1]
-                    if key in previous_entry:
-                        previous_value = previous_entry[key]
-                        if abs(value - previous_value) > max_jump:
-                            sudden_change_entries.append({"entry": entry, "key": key, "value": value, "previous_value": previous_value, "max_jump": max_jump})
+
+        for i in range(1, len(self.entries)):
+            current_entry = self.entries[i]
+            previous_entry = self.entries[i-1]
+
+            for key, max_jump in self.VALID_CHANGES_JUMPS.items():
+                if key in current_entry and key in previous_entry:
+                        try:
+                            current_value = float(current_entry[key])
+                            previous_value = float(previous_entry[key])
+                        except (ValueError, TypeError):
+                            continue
+                        if abs(current_value - previous_value) > max_jump:
+                            sudden_change_entries.append({"entry": current_entry, "key": key, "value": current_value, "previous_value": previous_value, "max_jump": max_jump})
         return sudden_change_entries
     
     def heatindex_consistency_detection(self):
@@ -148,6 +157,14 @@ def main():
     print(f"Median: {stats_calculator.median}")
     print("\nDetecting missing messages...")
     stats_calculator.detect_missing_messages();
+    print("\nDetecting out-of-range values...")
+    out_of_range_entries = stats_calculator.out_of_range_detection()
+    for issue in out_of_range_entries:
+        print(f"Out-of-range detected: Key '{issue['key']}' with value {issue['value']} is outside valid range {issue['valid_range']} in entry: {issue['entry']}")
+    sudden_change_entries = stats_calculator.sudden_change_detection()
+    print("\nDetecting sudden changes...")
+    for issue in sudden_change_entries:
+        print(f"\nSudden change detected: Key '{issue['key']}' changed from {issue['previous_value']} to {issue['value']} exceeding max jump of {issue['max_jump']} in entry: {issue['entry']}")
     
 
 if __name__ == "__main__":
