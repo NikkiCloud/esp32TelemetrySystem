@@ -113,17 +113,24 @@ def build_layout(filename: str) -> Layout:
         Layout(name="left_body", ratio=1),
     )
 
+    status_col = status_style(status)
+    age_col = age_style(delta_sec, expected, tolerance)
+    header_line = (
+        f"Status: [{status_col}]{status}[/{status_col}] | "
+        f"Last update: {last_update_str} | "
+    )
+    if delta_sec is not None:
+        header_line += f"Data age: [{age_col}]{delta_sec:.1f}s[/{age_col}] | "
+
+    header_line += f"Received: {msg_total} | Gaps: {total_gaps} | Missing: {total_missing_msgs}"
+
     header_group = Group(
-        Panel("Dashboard | Broker: CONNECTED | Topic: esp32/dht11_sensor"),
-        Panel(
-            f"Status: {status} | "
-            f"Last update: {last_update_str} | "
-            + (f"Data age: {delta_sec:.1f}s | " if delta_sec is not None else "")
-            + f"Received: {msg_total} | Gaps: {total_gaps} | Missing: {total_missing_msgs}"
-        ),
+        Panel("Dashboard | Broker: CONNECTED | Topic: esp32/dht11_sensor", border_style= "cyan"),
+        Panel(header_line, border_style= "cyan")
     )
     layout["header"].update(header_group)
 
+    right_border = "green" if status == "LIVE" else "red"
     right_panel = Panel(
         "Current Sensor Values (from last message received)\n"
         "--------------------------------------------------\n"
@@ -133,10 +140,12 @@ def build_layout(filename: str) -> Layout:
         f"Device: esp32/dht11_sensor\n"
         f"Device timestamp (ms since boot): {device_timestamp}\n"
         f"Received at (UTC): {last_update_str}\n"
-    )
+    , border_style=right_border)
     layout["right_body"].update(right_panel)
 
-    layout["left_body"].update(Panel(alerts_text))
+    alerts_border = "green" if "(no alerts)" in alerts_text else "red"
+    layout["left_body"].update(Panel(alerts_text, border_style=alerts_border))
+
     return layout
     
 def format_time_hhmmss(received_at: float | int | None) -> str:
@@ -145,6 +154,21 @@ def format_time_hhmmss(received_at: float | int | None) -> str:
     
     dt = datetime.fromtimestamp(float(received_at), tz=UTC)
     return dt.strftime("%H:%M:%S")
+
+def status_style(status: str) -> str:
+    return "green" if status == "LIVE" else "red"
+
+def age_style(delta_sec: float | None, expected: int, tolerance: int) -> str:
+    if delta_sec is None:
+        return "red"
+    seuil = (expected * 2) + tolerance
+    warn = expected + tolerance
+    if delta_sec <= warn:
+        return "green"
+    if delta_sec <= seuil:
+        return "yellow"
+    return "red"
+
     
 def main():
     console = Console()
