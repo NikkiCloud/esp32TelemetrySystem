@@ -42,13 +42,30 @@ def main():
     msg_total = len(stats_cal.entries)
     total_missing_msgs, total_gaps = stats_cal.detect_missing_messages()
 
+    if snapshot["last_entry"]:
+        temperatureC = snapshot['last_entry']["temperatureCelcius"]
+    else:
+        temperatureC = "N/A"
     
-    
+    if snapshot["last_entry"]:
+        humidity = snapshot['last_entry']["humidityPercent"]
+    else:
+        humidity = "N/A"
+
+    if snapshot["last_entry"]:
+        heat_index_celcius = snapshot['last_entry']["heatIndexCelcius"]
+    else:
+        heat_index_celcius = "N/A"
+
+    if snapshot["last_entry"]:
+        timestamp = snapshot['last_entry']["timestamp"]
+    else:
+        timestamp = "N/A"
 
     layout = Layout()
     layout.split_column(
-        Layout(name="header"),
-        Layout(name="upper_body", ratio= 1),
+        Layout(name="header", size =6),
+        Layout(name="upper_body", ratio= 3),
         Layout(name="lower_body", ratio=1)
     )
     panel_group_header = Group(
@@ -56,6 +73,19 @@ def main():
         Panel(f"Last update: {last_update} | Received Messages : {msg_total} | Gaps: {total_gaps} | Missing messages: {total_missing_msgs}"),
     )
     layout["header"].update(panel_group_header)
+
+    panel_group_upper = Group(
+        Panel("Current Sensor Values (from last message received)\n" \
+        "-------------------------------------------------------------\n" \
+        f"Temperature (celcius): {temperatureC} \n"
+        f"Humidity (%): {humidity}\n"
+        f"Heat Index (celcius): {heat_index_celcius} \n"
+        f"Device: esp32/dht11_sensor\n"
+        f"Timestamp: {timestamp}\n"
+        f"Received at: {last_update}\n"
+        ),
+    )
+    layout["upper_body"].update(panel_group_upper)
     rprint(layout)
 
 if __name__ == "__main__":
