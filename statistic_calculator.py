@@ -2,8 +2,6 @@ import statistics
 import datetime
 import json
 
-from pydantic import InstanceOf
-
 class StatisticCalculator:
     def __init__(self, filename: str, expected_msg_interval_millisec: int = 10000, tolerance_millisec: float = 1.5):
         self.entries = self.read_jsonl_file(filename)
@@ -23,6 +21,7 @@ class StatisticCalculator:
             "temperatureFahrenheit": 3.0,
             "humidityPercent": 5.0
         }
+        
 
     def read_jsonl_file(self, filename: str) -> list[dict]:
         entries = []
@@ -108,6 +107,8 @@ class StatisticCalculator:
             f"Total of missing messages: {total_missing_msgs}\n"
             f"Total of expected messages: {len(self.entries) + total_missing_msgs}\n"
             f"Number of gaps (meaning how many interruption occured) {total_gaps}\n")
+        
+        return total_missing_msgs, total_gaps
     
     def out_of_range_detection(self):
         out_of_range_entries = []
