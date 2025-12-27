@@ -1,6 +1,9 @@
 import statistics
 import datetime
 import json
+import time
+
+OFFLINE_TIMEOUT_SEC = 30  
 
 class TelemetryAnalyzer:
     def __init__(self, filename: str, expected_msg_interval_sec: int = 10, tolerance_sec: float = 1.5):
@@ -236,6 +239,39 @@ class TelemetryAnalyzer:
 
         status = "ANOMALY" if reasons else "OK"
         return status, reasons
+
+    def out_of_range_detection_recent(self, entries: list[dict]) -> list[dict]:
+        issues = []
+        for entry in entries:
+            for key, (min_value, max_value) in self.VALID_RANGES.items():
+                if key not in entry:
+                    continue
+                try:
+                    value = float(entry[key])
+                except (ValueError, TypeError):
+                    continue
+                if value < min_value or value > max_value:
+                    issues.append({"entry": entry, "key": key, "value": value, "valid_range": (min_value, max_value)})
+        return issues
+
+
+    def sudden_change_detection_recent(self, entries: list[dict]) -> list[dict]:
+        issues = []
+        for i in range(1, len(entries)):
+            current = entries[i]
+            prev = entries[i - 1]
+            for key, max_jump in self.VALID_CHANGES_JUMPS.items():
+                if key not in current or key not in prev:
+                    continue
+                try:
+                    current_v = float(current[key])
+                    prev_v = float(prev[key])
+                except (ValueError, TypeError):
+                    continue
+                if abs(current_v - prev_v) > max_jump:
+                    issues.append({"entry": current, "key": key, "value": current_v, "previous_value": prev_v, "max_jump": max_jump})
+        return issues
+
 
 def get_detected_time(entry: dict) -> float:
     return entry.get("received at", 0)
