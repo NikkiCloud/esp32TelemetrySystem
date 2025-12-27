@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 import time
 import statistics
 
-from telemetry_analyzer import TelemetryAnalyzer
+from backend.telemetry_analyzer import TelemetryAnalyzer
 
 from rich.layout import Layout
 from rich.panel import Panel
