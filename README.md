@@ -202,8 +202,6 @@ Several design choices were made intentionally to keep the system focused on rel
 - **Append-only JSONL logging**  
   Telemetry is logged using an append-only JSONL format for robustness and simplicity. This allows safe inspection of historical data and offline analysis without requiring a database and easy integration with analysis scripts.
 
-These decisions reflect an experimental, system-oriented mindset rather than a product-oriented one.
-
 ## Limitations
 
 **Timing and jitter analysis**
