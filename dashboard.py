@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 import time
-from statistic_calculator import StatisticCalculator
+from telemetry_analyzer import TelemetryAnalyzer
 from rich import print as rprint
 from rich.layout import Layout
 from rich.panel import Panel
@@ -10,7 +10,7 @@ from rich.live import Live
 
     
 def build_layout(filename: str) -> Layout: 
-    stats_cal = StatisticCalculator(filename)
+    stats_cal = TelemetryAnalyzer(filename)
     snapshot = {
         "last_entry" : stats_cal.entries[-1] if stats_cal.entries else None,
         "statistics":  {

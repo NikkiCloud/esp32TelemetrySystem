@@ -2,8 +2,8 @@ import statistics
 import datetime
 import json
 
-class StatisticCalculator:
-    def __init__(self, filename: str, expected_msg_interval_millisec: int = 10000, tolerance_millisec: float = 1.5):
+class TelemetryAnalyzer:
+    def __init__(self, filename: str, expected_msg_interval_sec: int = 10, tolerance_sec: float = 1.5):
         self.entries = self.read_jsonl_file(filename)
         self.entries_by_sensor = self.read_jsonl_file_by_sensor(filename)
         self.mean = self.calculate_mean()
@@ -15,8 +15,8 @@ class StatisticCalculator:
         self.median = self.calculate_median()
         self.median_by_sensor = self.calculate_median_by_sensor()
 
-        self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS = expected_msg_interval_millisec
-        self.TOLERANCE_MESSAGE_INTERVAL = tolerance_millisec
+        self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS = expected_msg_interval_sec
+        self.TOLERANCE_MESSAGE_INTERVAL = tolerance_sec
         self.VALID_RANGES = {
             "temperatureCelcius": (0, 50),
             "temperatureFahrenheit": (32, 122),
@@ -43,7 +43,7 @@ class StatisticCalculator:
                     print("Bad line (preview):", line[:120])
                     continue
         return entries
-    
+
     def read_jsonl_file_by_sensor(self, filename: str) -> dict[str, list[dict]]:
         entries_by_sensor = {}
         for entry in self.entries:
@@ -52,6 +52,8 @@ class StatisticCalculator:
                 if sensor_id not in entries_by_sensor:
                     entries_by_sensor[sensor_id] = []
                 entries_by_sensor[sensor_id].append(entry)
+        for sensor_id, entries in entries_by_sensor.items():
+            entries.sort(key=get_detected_time)
         return entries_by_sensor
 
     def extrat_value_list(self, key: str = "temperatureCelcius", sensor_id : str| None = None) -> list[float|int]:       
@@ -80,7 +82,7 @@ class StatisticCalculator:
         return value_list_by_sensor
     
     def calculate_min(self, key: str = "temperatureCelcius", sensor_id : str| None = None) -> float|None:
-        value_list = self.extrat_value_list(key)
+        value_list = self.extrat_value_list(key, sensor_id)
         if value_list:
             return min(value_list)
         else:
@@ -93,7 +95,7 @@ class StatisticCalculator:
         return value_list_by_sensor
     
     def calculate_max(self, key: str = "temperatureCelcius", sensor_id : str| None = None) -> float|None:
-        value_list = self.extrat_value_list(key)
+        value_list = self.extrat_value_list(key, sensor_id)
         if value_list:
             return max(value_list)
         else:
@@ -106,7 +108,7 @@ class StatisticCalculator:
         return value_list_by_sensor
     
     def calculate_median(self, key: str = "temperatureCelcius", sensor_id : str| None = None) -> float|None:
-        value_list = self.extrat_value_list(key)
+        value_list = self.extrat_value_list(key, sensor_id)
         if value_list:
             return statistics.median(value_list)
         else:
@@ -119,7 +121,7 @@ class StatisticCalculator:
         return value_list_by_sensor
              
     def calculate_timestamp_delta(self, sensor_id: str) -> list[float]:
-        timestamp_list = self.extrat_value_list("detected at", sensor_id)
+        timestamp_list = self.extrat_value_list("received at", sensor_id)
         #print(timestamp_list[0:5])
         timestamp_list.sort()
         #print(timestamp_list[0:5])
@@ -130,6 +132,7 @@ class StatisticCalculator:
 
 
     def detect_missing_messages(self, sensor_id: str) -> tuple[int, int]:
+        entries = self.entries_by_sensor.get(sensor_id, [])
         delta_timestamp_list = self.calculate_timestamp_delta(sensor_id)
         total_gaps = 0;
         total_missing_msgs = 0;
@@ -145,9 +148,9 @@ class StatisticCalculator:
                 
         print(
             f"Sensor ID: {sensor_id}\n"
-            f"Total of recorded messages: {len(self.entries)}\n"
+            f"Total of recorded messages: {len(entries)}\n"
             f"Total of missing messages: {total_missing_msgs}\n"
-            f"Total of expected messages: {len(self.entries) + total_missing_msgs}\n"
+            f"Total of expected messages: {len(entries) + total_missing_msgs}\n"
             f"Number of gaps (meaning how many interruption occured) {total_gaps}\n")
         
         return total_missing_msgs, total_gaps
@@ -165,6 +168,7 @@ class StatisticCalculator:
                         continue
                     if value < min_value or value > max_value:
                         out_of_range_entries.append({"entry": entry, "key": key, "value": value, "valid_range": (min_value, max_value)})
+     
         return out_of_range_entries 
 
     def sudden_change_detection(self, sensor_id: str):
@@ -184,23 +188,74 @@ class StatisticCalculator:
                             continue
                         if abs(current_value - previous_value) > max_jump:
                             sudden_change_entries.append({"entry": current_entry, "key": key, "value": current_value, "previous_value": previous_value, "max_jump": max_jump})
+
         return sudden_change_entries
     
+    def is_last_entry_out_of_range(self, sensor_id: str) -> bool:
+        entries = self.entries_by_sensor.get(sensor_id, [])
+        if not entries:
+            return False
+
+        last = entries[-1]
+        for key, (min_val, max_val) in self.VALID_RANGES.items():
+            if key in last:
+                try:
+                    value = float(last[key])
+                except (ValueError, TypeError):
+                    continue
+                if value < min_val or value > max_val:
+                    return True
+        return False
+
+
+    def is_last_entry_sudden_change(self, sensor_id: str) -> bool:
+        entries = self.entries_by_sensor.get(sensor_id, [])
+        if len(entries) < 2:
+            return False
+
+        last_entry = entries[-1]
+        previous_entry = entries[-2]
+
+        for key, max_jump in self.VALID_CHANGES_JUMPS.items():
+            if key in last_entry and key in previous_entry:
+                try:
+                    value_last = float(last_entry[key])
+                    value_prev = float(previous_entry[key])
+                except (ValueError, TypeError):
+                    continue
+                if abs(value_last - value_prev) > max_jump:
+                    return True
+        return False
+
+    
+    def evaluate_sensor_status(self, sensor_id: str):
+        reasons = []
+        if self.is_last_entry_out_of_range(sensor_id):
+            reasons.append("OUT_OF_RANGE")
+        if self.is_last_entry_sudden_change(sensor_id):
+            reasons.append("SUDDEN_CHANGE")
+
+        status = "ANOMALY" if reasons else "OK"
+        return status, reasons
+
+
+def get_detected_time(entry: dict) -> float:
+    return entry.get("received at", 0)
 
 def main():
     filename = "data.jsonl"
-    stats_calculator = StatisticCalculator(filename)
-    print(f"Mean: {stats_calculator.mean_by_sensor}")
-    print(f"Min: {stats_calculator.min_by_sensor}")
-    print(f"Max: {stats_calculator.max_by_sensor}")
-    print(f"Median: {stats_calculator.median_by_sensor}")
+    telemetry_analyzer = TelemetryAnalyzer(filename)
+    print(f"Mean: {telemetry_analyzer.mean_by_sensor}")
+    print(f"Min: {telemetry_analyzer.min_by_sensor}")
+    print(f"Max: {telemetry_analyzer.max_by_sensor}")
+    print(f"Median: {telemetry_analyzer.median_by_sensor}")
     #print("\nDetecting missing messages...")
-    stats_calculator.detect_missing_messages("A01");
+    telemetry_analyzer.detect_missing_messages("A01");
     print("\nDetecting out-of-range values...")
-    out_of_range_entries = stats_calculator.out_of_range_detection("A01")
+    out_of_range_entries = telemetry_analyzer.out_of_range_detection("A01")
     for issue in out_of_range_entries:
         print(f"Out-of-range detected: Key '{issue['key']}' with value {issue['value']} is outside valid range {issue['valid_range']} in entry: {issue['entry']}")
-    sudden_change_entries = stats_calculator.sudden_change_detection("A01")
+    sudden_change_entries = telemetry_analyzer.sudden_change_detection("A01")
     print("\nDetecting sudden changes...")
     for issue in sudden_change_entries:
         print(f"\nSudden change detected: Key '{issue['key']}' changed from {issue['previous_value']} to {issue['value']} exceeding max jump of {issue['max_jump']} in entry: {issue['entry']}")
