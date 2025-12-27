@@ -227,7 +227,6 @@ class TelemetryAnalyzer:
                     return True
         return False
 
-    
     def evaluate_sensor_status(self, sensor_id: str):
         reasons = []
         if self.is_last_entry_out_of_range(sensor_id):
@@ -238,9 +237,9 @@ class TelemetryAnalyzer:
         status = "ANOMALY" if reasons else "OK"
         return status, reasons
 
-
 def get_detected_time(entry: dict) -> float:
     return entry.get("received at", 0)
+
 
 def main():
     filename = "data.jsonl"
