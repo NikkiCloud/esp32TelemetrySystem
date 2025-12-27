@@ -203,3 +203,21 @@ Several design choices were made intentionally to keep the system focused on rel
   Telemetry is logged using an append-only JSONL format for robustness and simplicity. This allows safe inspection of historical data and offline analysis without requiring a database and easy integration with analysis scripts.
 
 These decisions reflect an experimental, system-oriented mindset rather than a product-oriented one.
+
+## Limitations
+
+**Timing and jitter analysis**
+- Device and backend timestamps are recorded but analysis of timing drift and jitter could be added to better characterize real-time behavior.
+
+**Power optimization** 
+- Power consumption is not optimized in the current implementation. Publish intervals and sleep modes could be explored.
+
+**System robustness:**
+- Message delivery guarantees rely entirely on MQTT QoS settings without application-level verification
+
+**Firmware architecture:**
+- The firmware runs without an RTOS, which limits separation of concerns between sampling, communication, and monitoring
+- Error recovery is basic - more sophisticated fault handling could be added
+
+## Demo
+***Demo coming soon***
