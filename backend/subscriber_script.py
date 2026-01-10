@@ -24,11 +24,11 @@ def on_message(client, userdata, msg):
     print("Sensor id: " + sensor_id + ", Message topic: "+ msg.topic + ", QoS: " + str(msg.qos) + ", Message content: " + msg.payload.decode())
     data_dict["sensor_id"] = sensor_id
     data_dict.update(convert_jsonstrin_to_dict(msg.payload))
-    data_dict["received at"] =  time.time()
-    #data_dict["received at"] =  datetime.datetime.now().isoformat()
+    data_dict["received_at"] =  time.time()
+    #data_dict["received_at"] =  datetime.datetime.now().isoformat()
     data_dict["topic"] =  msg.topic
     if data_dict:
-        save_data_to_jsonfile(data_dict, "data.jsonl")
+        save_data_to_jsonfile(data_dict, "data/data.jsonl")
     
     now = time.time()
     last_seen[sensor_id] = now

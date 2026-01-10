@@ -70,7 +70,7 @@ def build_sensor_snapshots(filename: str) -> dict[str, dict]:
         recent = entries[-RECENT_N:]
         last_entry = entries[-1]
 
-        last_received = float(last_entry.get("received at", 0.0))
+        last_received = float(last_entry.get("received_at", 0.0))
         age_sec = now - last_received
         online = age_sec <= OFFLINE_TIMEOUT_SEC
 
@@ -96,7 +96,7 @@ def build_sensor_snapshots(filename: str) -> dict[str, dict]:
 
         for issue in out_range[-3:]:
             entry = issue.get("entry", {})
-            utc_string = timestamp_to_utc(entry.get("received at"))
+            utc_string = timestamp_to_utc(entry.get("received_at"))
             key = issue.get("key", "unknown")
             value = issue.get("value", "N/A")
             valid_range = issue.get("valid_range", ("?", "?"))
@@ -104,7 +104,7 @@ def build_sensor_snapshots(filename: str) -> dict[str, dict]:
 
         for issue in sudden_change[-3:]:
             entry = issue.get("entry", {})
-            utc_string = timestamp_to_utc(entry.get("received at"))
+            utc_string = timestamp_to_utc(entry.get("received_at"))
             key = issue.get("key", "unknown")
             previous_value = issue.get("previous_value", "N/A")
             current_value = issue.get("value", "N/A")

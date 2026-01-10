@@ -14,6 +14,9 @@ const char* mqtt_pwd = MQTT_PWD;
 // time variables
 unsigned long currentMillis;
 unsigned long mqttPreviousMillis = 0;
+const unsigned long PUBLISH_INTERVAL = 5000;
+unsigned long lastPublishedSampledAt = 0;
+
 //mqtt topic for tests
 const char* topic_publish_test = "esp32/test";
 const char* topic_subscribe_test = "esp32/sub_test";
@@ -25,7 +28,14 @@ PubSubClient mqttClient(wifiClient);
 void setupMQTT(){
   wifiClient.setInsecure();
   mqttClient.setServer(mqtt_broker,mqtt_port);
+  mqttClient.setBufferSize(512);
   mqttClient.setCallback(mqttCallback);
+}
+
+void mqttLoop(){
+  if(!mqttClient.connected()){
+    mqttClient.loop();
+  }
 }
 
 void connectAndReconnectToBrokerMQTT(){
@@ -44,48 +54,77 @@ void connectAndReconnectToBrokerMQTT(){
       delay(2000);
     }
   }
-  mqttClient.loop();
 }
 
-String structToJsonDh11Readings(){
-  DHTSensorReadings dhtReadings = handleDhtSensor();
+String structToJsonDh11Readings(DHTSensorReadings dhtReadings, unsigned long publishedAt, bool isReadingNewComparedToLastOne, unsigned long ageReadingsMillis){
+  
+  String json = "{";
+    json += "\"isReadingValid\":" + String(dhtReadings.isReadingsValid ? "true" : "false");
+    json += ",\"hasNewReading\":" + String(isReadingNewComparedToLastOne ? "true" : "false");
+    json += ",\"sampledAt\":" + String(dhtReadings.sampledAt);
+    json += ",\"publishedAt\":" + String(publishedAt);
+    json += ",\"ageReadings\":" + String(ageReadingsMillis);
+  
   if(!dhtReadings.isReadingsValid){
     Serial.println("DHT11 readings are invalid...");
-    return "";
   }
-  else {
-    String json = "{";
-    json += "\"temperatureCelcius\":" + String(dhtReadings.temperatureCelcius);
+  
+  if(dhtReadings.isReadingsValid) {
+    json += ",\"temperatureCelcius\":" + String(dhtReadings.temperatureCelcius);
     json += ",\"temperatureFahrenheit\":" + String(dhtReadings.temperatureFahrenheit);
     json += ",\"humidityPercent\":" + String(dhtReadings.humidityPercent);
     json += ",\"heatIndexCelcius\":" + String(dhtReadings.heatIndexCelcius);
     json += ",\"heatIndexFahrenheit\":" + String(dhtReadings.heatIndexFahrenheit);
-    json += ",\"detected at\":" + String(dhtReadings.timestamp_millisec);
-    json += "}";
-
-    return json;
   }
+  else {
+    json += ",\"error\":\"DHT_READ_FAILED\"";
+  }
+  
+  json += "}";
+  return json;
 }
 
-void publishToBrokerMQTT(){
+void publishToBrokerMQTT(DHTSensorReadings dhtReadings){
   connectAndReconnectToBrokerMQTT();
   currentMillis = millis();
 
-  if(currentMillis - mqttPreviousMillis >= 5000){
+  if(currentMillis - mqttPreviousMillis >= PUBLISH_INTERVAL){
     mqttPreviousMillis = currentMillis;
+    Serial.println("Publishing to broker");
+
+    Serial.print("MQTT connected right now? ");
+    Serial.println(mqttClient.connected() ? "YES" : "NO");
+    Serial.print("WiFi status: ");
+    Serial.println(WiFi.status());
+
+    
+
+
+    
+    bool isReadingNewComparedToLastOne = (dhtReadings.sampledAt !=0) && (dhtReadings.sampledAt != lastPublishedSampledAt);
+    unsigned long ageReadingsMillis = (dhtReadings.sampledAt == 0) ? 0 : (currentMillis - dhtReadings.sampledAt);
+    
+    String readingsJson = structToJsonDh11Readings(dhtReadings, currentMillis, isReadingNewComparedToLastOne, ageReadingsMillis);
+
+    Serial.print("Payload length: ");
+    Serial.println(readingsJson.length());
+    
     //publish msg to topic
-    mqttClient.publish(topic_publish_test, "Ceci est un test");
-    String readingsJson = structToJsonDh11Readings();
+    bool ok;
     if(topic_publish_dht_readings == "iot/home/A01/telemetry")
     {
-      mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
+      ok = mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
       topic_publish_dht_readings = "iot/home/B01/telemetry";
     }
     else 
     {
-      mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
+      ok = mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
       topic_publish_dht_readings = "iot/home/A01/telemetry";
     }
+    if(isReadingNewComparedToLastOne){
+      lastPublishedSampledAt = dhtReadings.sampledAt;
+    }
+    Serial.println(ok ? "Publish OK" : "Publish FAILED");
   }
 }
 

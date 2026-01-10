@@ -124,7 +124,7 @@ class TelemetryAnalyzer:
         return value_list_by_sensor
              
     def calculate_timestamp_delta(self, sensor_id: str) -> list[float]:
-        timestamp_list = self.extrat_value_list("received at", sensor_id)
+        timestamp_list = self.extrat_value_list("received_at", sensor_id)
         #print(timestamp_list[0:5])
         timestamp_list.sort()
         #print(timestamp_list[0:5])
@@ -274,11 +274,11 @@ class TelemetryAnalyzer:
 
 
 def get_detected_time(entry: dict) -> float:
-    return entry.get("received at", 0)
+    return entry.get("received_at", 0)
 
 
 def main():
-    filename = "data.jsonl"
+    filename = "data/data.jsonl"
     telemetry_analyzer = TelemetryAnalyzer(filename)
     print(f"Mean: {telemetry_analyzer.mean_by_sensor}")
     print(f"Min: {telemetry_analyzer.min_by_sensor}")

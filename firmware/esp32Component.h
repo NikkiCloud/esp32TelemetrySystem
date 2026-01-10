@@ -1,4 +1,6 @@
+#pragma once
 void handleLed(String msg);
+void setupComponentDHT();
 struct DHTSensorReadings {
   float temperatureCelcius;
   float temperatureFahrenheit;
@@ -6,6 +8,7 @@ struct DHTSensorReadings {
   float heatIndexCelcius;
   float heatIndexFahrenheit;
   bool isReadingsValid;
-  unsigned long timestamp_millisec;
+  bool hasNewReading;
+  unsigned long sampledAt;
 };
 DHTSensorReadings handleDhtSensor();
