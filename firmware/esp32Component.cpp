@@ -71,6 +71,36 @@ DHTSensorReadings handleDhtSensor(){
   return readings;
 }
 
+void setLedForState(DeviceState state, bool mqttIsConnected){
+  switch(state){
+    case DeviceState::INIT: {
+      digitalWrite(PIN_BLUE, HIGH);
+      digitalWrite(PIN_GREEN, LOW);
+      digitalWrite(PIN_RED, LOW);
+      break;
+    }
+    case DeviceState::RUNNING: {
+      if(!mqttIsConnected){
+        digitalWrite(PIN_BLUE, HIGH);
+        digitalWrite(PIN_GREEN, HIGH);
+        digitalWrite(PIN_RED, HIGH);
+      }
+      else {
+        digitalWrite(PIN_BLUE, LOW);
+        digitalWrite(PIN_GREEN, HIGH);
+        digitalWrite(PIN_RED, LOW);
+      }
+      break;
+    }
+    case DeviceState::ERROR: {
+      digitalWrite(PIN_BLUE, LOW);
+      digitalWrite(PIN_GREEN, LOW);
+      digitalWrite(PIN_RED, HIGH);
+      break;
+    }
+  }
+}
+
 void handleLed(String msg){
   setupComponentLed();
   if(msg == "ON"){
