@@ -17,10 +17,6 @@ unsigned long mqttPreviousMillis = 0;
 const unsigned long PUBLISH_INTERVAL = 5000;
 unsigned long lastPublishedSampledAt = 0;
 
-//mqtt topic for tests
-const char* topic_publish_test = "esp32/test";
-const char* topic_subscribe_test = "esp32/sub_test";
-
 bool togglePublishTopic = false;
 
 WiFiClientSecure wifiClient;
@@ -47,8 +43,6 @@ void connectAndReconnectToBrokerMQTT(){
     
     if(mqttClient.connect("esp32Client", mqtt_username, mqtt_pwd)){
       Serial.println("Connected to MQTT broker");
-      mqttClient.subscribe(topic_subscribe_test);
-      Serial.println(String("Susbcribed to topic :" ) + topic_subscribe_test);
     }
     else {
       Serial.println(String("Connection failed... current state : ") + mqttClient.state());
@@ -101,7 +95,7 @@ void publishToBrokerMQTT(DHTSensorReadings dhtReadings){
     mqttPreviousMillis = currentMillis;
     Serial.println("Publishing to broker");
     Serial.print("MQTT connected right now? ");
-    Serial.println(mqttClient.connected() ? "YES" : "NO");
+    Serial.println(mqttClient.connected() ? "yes" : "no");
     Serial.print("WiFi status: ");
     Serial.println(WiFi.status());
     
@@ -124,8 +118,5 @@ void mqttCallback(const char* topic, byte* payload, unsigned int length){
     String message;
     for(int i = 0; i < length; i++){
       message += (char)payload[i];
-    }
-    if(String(topic) == topic_subscribe_test){
-      handleLed(message);
     } 
 }

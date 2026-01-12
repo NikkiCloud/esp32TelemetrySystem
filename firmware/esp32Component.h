@@ -4,7 +4,6 @@
 #define PIN_RED 23
 #define PIN_GREEN 22
 #define PIN_BLUE 21
-void handleLed(String msg);
 void setupComponentDHT();
 void setupComponentLed();
 struct DHTSensorReadings {

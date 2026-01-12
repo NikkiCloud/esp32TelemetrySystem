@@ -24,8 +24,6 @@ void setupComponentDHT(){
 
 DHTSensorReadings handleDhtSensor(){
   DHTSensorReadings readings{};
-  //readings.isReadingsValid = false;
-  //readings.hasNewReading = false;
   unsigned long currentMillis = millis();
   
   if(currentMillis - dhtPreviousMillis >= INTERVAL){
@@ -44,6 +42,7 @@ DHTSensorReadings handleDhtSensor(){
   
     // Check if any reads failed and exit early (to try again).
     if (isnan(readings.humidityPercent) || isnan(readings.temperatureCelcius) || isnan(readings.temperatureFahrenheit)) {
+      //code below is adapted from "https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-sensor-arduino-ide/"
       Serial.println(F("Failed to read from DHT sensor!"));
       return readings;
     }    
@@ -99,20 +98,4 @@ void setLedForState(DeviceState state, bool mqttIsConnected){
       break;
     }
   }
-}
-
-void handleLed(String msg){
-  setupComponentLed();
-  if(msg == "ON"){
-    Serial.println("Il est temps d'ouvrir la lumière");
-    ledState = HIGH;
-  }
-  else if (msg == "OFF"){
-    Serial.println("Il est temps de fermer la lumière");
-    ledState = LOW;
-  }
-  else{
-    Serial.println("Message received doesnt correspond to a led state...");
-  }
-  digitalWrite(LED_BUILTIN, ledState);
 }
