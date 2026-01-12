@@ -30,8 +30,6 @@ DHTSensorReadings handleDhtSensor(){
   DHTSensorReadings readings{};
   //readings.isReadingsValid = false;
   //readings.hasNewReading = false;
-  readings.sampledAt = millis();
-  setupComponentDHT();
   unsigned long currentMillis = millis();
   
   if(currentMillis - dhtPreviousMillis >= INTERVAL){

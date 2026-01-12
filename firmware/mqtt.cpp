@@ -20,7 +20,8 @@ unsigned long lastPublishedSampledAt = 0;
 //mqtt topic for tests
 const char* topic_publish_test = "esp32/test";
 const char* topic_subscribe_test = "esp32/sub_test";
-char* topic_publish_dht_readings = "iot/home/A01/telemetry";
+
+bool togglePublishTopic = false;
 
 WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -33,7 +34,7 @@ void setupMQTT(){
 }
 
 void mqttLoop(){
-  if(!mqttClient.connected()){
+  if(mqttClient.connected()){
     mqttClient.loop();
   }
 }
@@ -54,6 +55,14 @@ void connectAndReconnectToBrokerMQTT(){
       delay(2000);
     }
   }
+}
+
+bool mqttIsConnected(){
+  return mqttClient.connected();
+}
+
+void wrapperForConnectAndReconnectToBrokerMQTTFunction(){
+  connectAndReconnectToBrokerMQTT();
 }
 
 String structToJsonDh11Readings(DHTSensorReadings dhtReadings, unsigned long publishedAt, bool isReadingNewComparedToLastOne, unsigned long ageReadingsMillis){
@@ -96,35 +105,19 @@ void publishToBrokerMQTT(DHTSensorReadings dhtReadings){
     Serial.println(mqttClient.connected() ? "YES" : "NO");
     Serial.print("WiFi status: ");
     Serial.println(WiFi.status());
-
-    
-
-
     
     bool isReadingNewComparedToLastOne = (dhtReadings.sampledAt !=0) && (dhtReadings.sampledAt != lastPublishedSampledAt);
     unsigned long ageReadingsMillis = (dhtReadings.sampledAt == 0) ? 0 : (currentMillis - dhtReadings.sampledAt);
     
     String readingsJson = structToJsonDh11Readings(dhtReadings, currentMillis, isReadingNewComparedToLastOne, ageReadingsMillis);
-
-    Serial.print("Payload length: ");
-    Serial.println(readingsJson.length());
     
     //publish msg to topic
-    bool ok;
-    if(topic_publish_dht_readings == "iot/home/A01/telemetry")
-    {
-      ok = mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
-      topic_publish_dht_readings = "iot/home/B01/telemetry";
-    }
-    else 
-    {
-      ok = mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
-      topic_publish_dht_readings = "iot/home/A01/telemetry";
-    }
+    const char* topic_publish_dht_readings = togglePublishTopic ? "iot/home/A01/telemetry" : "iot/home/B01/telemetry";
+    togglePublishTopic = !togglePublishTopic;
+    
     if(isReadingNewComparedToLastOne){
       lastPublishedSampledAt = dhtReadings.sampledAt;
     }
-    Serial.println(ok ? "Publish OK" : "Publish FAILED");
   }
 }
 
