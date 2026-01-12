@@ -1,26 +1,22 @@
 #include <Arduino.h>
 #include <DHT.h>
+#include "esp32Component.h"
 bool ledState = LOW;
 const int DHTPIN = 4;
 const int DHTTYPE = DHT11;
 DHT dht(DHTPIN, DHTTYPE);
+
 unsigned long dhtPreviousMillis = 0;
 const unsigned long INTERVAL = 2000;
 
-struct DHTSensorReadings {
-  float temperatureCelcius;
-  float temperatureFahrenheit;
-  float humidityPercent;
-  float heatIndexCelcius;
-  float heatIndexFahrenheit;
-  bool isReadingsValid;
-  bool hasNewReading;
-  unsigned long sampledAt;
-};
-
-
 void setupComponentLed(){
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_RED, OUTPUT);
+  pinMode(PIN_GREEN, OUTPUT);
+  pinMode(PIN_BLUE, OUTPUT);
+
+  digitalWrite(PIN_RED, LOW);
+  digitalWrite(PIN_GREEN, LOW);
+  digitalWrite(PIN_BLUE, LOW);
 }
 void setupComponentDHT(){
   dht.begin();

@@ -100,7 +100,6 @@ void publishToBrokerMQTT(DHTSensorReadings dhtReadings){
   if(currentMillis - mqttPreviousMillis >= PUBLISH_INTERVAL){
     mqttPreviousMillis = currentMillis;
     Serial.println("Publishing to broker");
-
     Serial.print("MQTT connected right now? ");
     Serial.println(mqttClient.connected() ? "YES" : "NO");
     Serial.print("WiFi status: ");
