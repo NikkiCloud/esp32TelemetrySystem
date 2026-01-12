@@ -107,6 +107,7 @@ void publishToBrokerMQTT(DHTSensorReadings dhtReadings){
     //publish msg to topic
     const char* topic_publish_dht_readings = togglePublishTopic ? "iot/home/A01/telemetry" : "iot/home/B01/telemetry";
     togglePublishTopic = !togglePublishTopic;
+    mqttClient.publish(topic_publish_dht_readings, readingsJson.c_str());
     
     if(isReadingNewComparedToLastOne){
       lastPublishedSampledAt = dhtReadings.sampledAt;
