@@ -267,4 +267,4 @@ Several design choices were made intentionally to keep the system focused on rel
 - Error recovery is basic - more sophisticated fault handling could be added
 
 ## Demo
-[Watch demo video](./esp32TelemetrySystem.mp4)
+[Watch demo video](./esp32TelemetrySystemCompressed.mp4)
