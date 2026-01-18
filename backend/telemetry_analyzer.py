@@ -18,7 +18,7 @@ class TelemetryAnalyzer:
         self.median = self.calculate_median()
         self.median_by_sensor = self.calculate_median_by_sensor()
 
-        self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS = expected_msg_interval_sec
+        self.EXPECTED_MESSAGE_INTERVAL_SECONDS = expected_msg_interval_sec
         self.TOLERANCE_MESSAGE_INTERVAL = tolerance_sec
         self.VALID_RANGES = {
             "temperatureCelcius": (0, 50),
@@ -140,13 +140,13 @@ class TelemetryAnalyzer:
         total_gaps = 0;
         total_missing_msgs = 0;
         for delta in delta_timestamp_list:
-            if(delta > self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS * self.TOLERANCE_MESSAGE_INTERVAL):
+            if(delta > self.EXPECTED_MESSAGE_INTERVAL_SECONDS * self.TOLERANCE_MESSAGE_INTERVAL):
                 total_gaps += 1
-                number_of_missing_msg = round(delta/self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS) - 1
+                number_of_missing_msg = round(delta/self.EXPECTED_MESSAGE_INTERVAL_SECONDS) - 1
                 total_missing_msgs += number_of_missing_msg
                 print(
-                f"Expected interval (in seconds): {self.EXPECTED_MESSAGE_INTERVAL_MILLISECONDS/1000} \n"
-                f"Delta observed (in seconds): {delta/1000} \n"
+                f"Expected interval (in seconds): {self.EXPECTED_MESSAGE_INTERVAL_SECONDS/1000} \n"
+                f"Delta observed (in seconds): {delta} \n"
                 f"Estimated number of missing messages: {number_of_missing_msg} \n")
                 
         print(
