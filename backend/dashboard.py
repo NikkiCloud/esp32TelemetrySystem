@@ -1,11 +1,8 @@
-# dashboard.py
-# Rich terminal dashboard (multi-sensor) using LAST 20 entries per sensor for stats + anomalies
-
 from datetime import UTC, datetime
 import time
 import statistics
 
-from backend.telemetry_analyzer import TelemetryAnalyzer
+from telemetry_analyzer import TelemetryAnalyzer
 
 from rich.layout import Layout
 from rich.panel import Panel
@@ -227,7 +224,7 @@ def build_layout(filename: str) -> Layout:
 
 def main():
     console = Console()
-    filename = "data.jsonl"
+    filename = "data/data.jsonl"
 
     with Live(build_layout(filename), console=console, refresh_per_second=2, screen=True) as live:
         while True:
