@@ -267,7 +267,4 @@ Several design choices were made intentionally to keep the system focused on rel
 - Error recovery is basic - more sophisticated fault handling could be added
 
 ## Demo
-<video controls width="600">
-  <source src="./esp32TelemetrySystem.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[Watch demo video](./esp32TelemetrySystem.mp4)
