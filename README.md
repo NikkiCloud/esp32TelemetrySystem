@@ -16,6 +16,10 @@ The system is structured as a telemetry pipeline with clear separation of respon
 
 Sensor → ESP32 (C++) → MQTT broker → Python backend → logs and monitoring
 
+**Multi-Device Note**
+
+This prototype currently simulates two devices by alternating the publish topic (A01 / B01) from a single ESP32. The backend treats them as separate sensors based on the topic structure
+
 ### Components
 
 **ESP32 (Firmware - C++)**
@@ -35,7 +39,7 @@ Sensor → ESP32 (C++) → MQTT broker → Python backend → logs and monitorin
 - Monitors device activity (online/offline detection)
 - Performs data analysis and anomaly detection
 
-This separation allows each part of the system to evolve independently and makes it easier to reason about system behavior, failure modes and timing issues in a real connected environment.
+This separation allows each part of the system to evolve independently and makes it easier to reason about system behavior, failure modes and timing issues in a real connected environment
 
 ## Device State Machine
 The ESP32 firmware implements an explicit state machine to model device behavior and failure handling
@@ -75,6 +79,7 @@ The ESP32 firmware implements an explicit state machine to model device behavior
 - LED-based visual feedback for device state and connectivity
 - Automatic Wi-Fi and MQTT reconnection logic 
 - Structured MQTT payloads with device identification
+- Multi-device topic structure (iot/home/{sensor_id}/telemetry) (currently simulated by alternating A01/B01 topics from a single ESP32)
 
 **Backend & Monitoring**
 - Python backend subscribing to MQTT telemetry
@@ -85,7 +90,7 @@ The ESP32 firmware implements an explicit state machine to model device behavior
 
 ## Telemetry Format
 
-Telemetry is published over MQTT using structured topics and an explicit payload format.
+Telemetry is published over MQTT using structured topics and an explicit payload format
 
 ### MQTT Topic
 ```iot/home/{sensor_id}/telemetry```
@@ -184,6 +189,7 @@ where `{sensor_id}` identifies the device (e.g. `A01`, `B01`)
    MQTT_USERNAME = "your_username"
    MQTT_PASSWORD = "your_password"
 ```
+4.  Create a `/data` folder
 
 ---
 
@@ -231,27 +237,27 @@ Provides:
 
 ## Design Decisions
 
-Several design choices were made intentionally to keep the system focused on reliability, observability, and clarity of behavior.
+Several design choices were made intentionally to keep the system focused on reliability, observability, and clarity of behavior
 
 - **Reliability over UI polish**  
-  The project prioritizes correct data flow, fault detection, and recovery behavior rather than user interface design. Visualization is treated as a supporting tool.
+  The project prioritizes correct data flow, fault detection, and recovery behavior rather than user interface design. Visualization is treated as a supporting tool
 
 - **Rule-based anomaly detection**  
-  Anomalies are detected using simple, explicit rules (out-of-range values, sudden changes, missing messages) instead of machine learning. This keeps the system explainable and suitable for inspecting real telemetry behavior.
+  Anomalies are detected using simple, explicit rules (out-of-range values, sudden changes, missing messages) instead of machine learning. This keeps the system explainable and suitable for inspecting real telemetry behavior
 
 - **Backend-driven logic**  
-  Device state, anomaly detection, and offline detection are handled in the backend. The dashboard only visualizes existing backend state and does not contain decision logic.
+  Device state, anomaly detection, and offline detection are handled in the backend. The dashboard only visualizes existing backend state and does not contain decision logic
 
 - **Append-only JSONL logging**  
-  Telemetry is logged using an append-only JSONL format for robustness and simplicity. This allows safe inspection of historical data and offline analysis without requiring a database and easy integration with analysis scripts.
+  Telemetry is logged using an append-only JSONL format for robustness and simplicity. This allows safe inspection of historical data and offline analysis without requiring a database and easy integration with analysis scripts
 
 ## Limitations
 
 **Timing and jitter analysis**
-- Device and backend timestamps are recorded but analysis of timing drift and jitter could be added to better characterize real-time behavior.
+- Device and backend timestamps are recorded but analysis of timing drift and jitter could be added to better characterize real-time behavior
 
 **Power optimization** 
-- Power consumption is not optimized in the current implementation. Publish intervals and sleep modes could be explored.
+- Power consumption is not optimized in the current implementation. Publish intervals and sleep modes could be explored
 
 **System robustness:**
 - Message delivery guarantees rely entirely on MQTT QoS settings without application-level verification
